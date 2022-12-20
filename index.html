@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="img/logo.ico" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
+  <title>Breakout Game</title>
+</head>
+<body>
+  <div class="sound">
+    <img src="img/SOUND_ON.png" alt="sound on image" id="sound">
+  </div>
+
+  <div id="gameOver">
+    <img src="img/gameWin.png" alt="game win image" id="youWon">
+    <img src="img/gameOver.png" alt="game over image" id="youLose">
+    <div id="restart">PLAY AGAIN!?</div>
+  </div>
+
+  <canvas id="breakout" class="breakout" width="400" height="500"></canvas>
+  <div class="gamepad">
+    <button id="leftBtn" class="left">LEFT</button>
+    <button id="rightBtn" class="right">RIGHT</button>
+  </div>
+  <script src="components.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
