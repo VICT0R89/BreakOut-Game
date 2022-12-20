@@ -71,13 +71,13 @@ const rightBtn = document.getElementById('rightBtn');
 leftBtn.addEventListener("click", function(){
   
   if(paddle.x > 0){
-    paddle.x -= 50;
+    paddle.x -= 75;
   }
 })
 
 rightBtn.addEventListener("click", function(){
   if(paddle.x + paddle.width < cvs.width){
-    paddle.x += 50;
+    paddle.x += 75;
   }
 })
 
