@@ -32,16 +32,17 @@ const paddle = {
   y : cvs.height - PADDLE_MARGIN_BOTTOM - PADDLE_HEIGHT,
   width : PADDLE_WIDTH,
   height : PADDLE_HEIGHT,
-  dx : 5
+  dx : 5,
+  madeFirstMove : false
 }
 
 // draw the paddle
 
 function drawPaddle() {
-  ctx.fillStyle = "#2e3548"
+  ctx.fillStyle = "#003049"
   ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 
-  ctx.strokeStyle = "#ffcd05";
+  ctx.strokeStyle = "#9e0059";
   ctx.strokeRect(paddle.x, paddle.y, paddle.width, paddle.height);
 }
 
@@ -50,15 +51,19 @@ function drawPaddle() {
 document.addEventListener("keydown", function(e){  
   if(e.key == "a" || e.key == "A" || e.key == 'ArrowLeft'){
     leftArrow = true;
+    paddle.madeFirstMove = true;
   } else if (e.key == "d" || e.key == "D" || e.key == 'ArrowRight'){
     rightArrow = true;
+    paddle.madeFirstMove = true;
   }
 })
 document.addEventListener("keyup", function(e){
   if(e.key == "a" || e.key == "A" || e.key == 'ArrowLeft'){
     leftArrow = false;
+    paddle.madeFirstMove = true;
   } else if (e.key == "d" || e.key == "D" || e.key == 'ArrowRight'){
     rightArrow = false;
+    paddle.madeFirstMove = true;
   }
 })
 
@@ -71,13 +76,15 @@ const rightBtn = document.getElementById('rightBtn');
 leftBtn.addEventListener("click", function(){
   
   if(paddle.x > 0){
-    paddle.x -= 75;
+    paddle.x -= 50;
+    paddle.madeFirstMove = true;
   }
 })
 
 rightBtn.addEventListener("click", function(){
   if(paddle.x + paddle.width < cvs.width){
-    paddle.x += 75;
+    paddle.x += 50;
+    paddle.madeFirstMove = true;
   }
 })
 
@@ -98,7 +105,7 @@ const ball = {
   x : cvs.width/2,
   y : paddle.y - BALL_RADIUS,
   radius : BALL_RADIUS,
-  speed : 4,
+  speed : 3,
   dx : 3 * (Math.random() * 2 - 1),
   dy : -3
 }
@@ -106,13 +113,14 @@ const ball = {
 // DRAW BALL
 
 function drawBall(){
+  
   ctx.beginPath();
 
   ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
-  ctx.fillStyle = "#ffcd05"
+  ctx.fillStyle = "#f28482"
   ctx.fill();
 
-  ctx.strokeStyle = "#2e3548";
+  ctx.strokeStyle = "#d90429";
   ctx.stroke();
 
   ctx.closePath();
@@ -121,27 +129,30 @@ function drawBall(){
 // MOVE BALL
 
 function moveBall(){
+  if(paddle.madeFirstMove){
   ball.x += ball.dx;
-  ball.y += ball.dy;
+  ball.y += ball.dy;}
 }
 
 // RESET BALL function
 
-function resetBall(){  
+function resetBall(){ 
+  if(paddle.madeFirstMove){ 
   ball.x = paddle.x + paddle.width/2;
   ball.y = paddle.y - BALL_RADIUS;
   ball.dx = 3 * (Math.random() * 2 - 1);
-  ball.dy = -3
+  ball.dy = -3}
+  paddle.madeFirstMove = false;
 }
 
 // BALL COLLISION DETECTION ---WALL---
 
 function ballWallCollision(){
-  if(ball.x + ball.radius > cvs.width || ball.x - ball.radius < 0){
+  if((ball.x + ball.radius) >= cvs.width || (ball.x - ball.radius) <= 0){
     ball.dx = - ball.dx;
     WALL_HIT.play();
   }
-  if(ball.y - ball.radius < 0){
+  if(ball.y - ball.radius <= 0){
     ball.dy = -ball.dy;
     WALL_HIT.play();
   }
@@ -155,13 +166,15 @@ function ballWallCollision(){
 // BALL COLLISION DETECTION --- PADDLE
 
 function ballPaddleCollision(){
-  if(ball.x < paddle.x + paddle.width &&
-    ball.x > paddle.x &&
-    paddle.y < paddle.y + paddle.height &&
-    ball.y > paddle.y){
-
+  if(
+    ball.y > paddle.y &&
+    ball.y < paddle.y + paddle.height &&
+    ball.x > paddle.x && 
+    ball.x < paddle.x + paddle.width
+    )
+    {
       // PLAY SOUND BALL-HIT-PADDLE
-      PADDLE_HIT.play();
+      if(paddle.madeFirstMove){PADDLE_HIT.play();}
       
       // CHECK WHERE THE BALL HIT THE PADDLE
       let collidePoint = ball.x - (paddle.x + paddle.width/2);
@@ -170,7 +183,7 @@ function ballPaddleCollision(){
       collidePoint = collidePoint / (paddle.width/2);
       
       // CALCULATE THE ANGLE
-      let angel = collidePoint * Math.PI/3;
+      let angel = collidePoint * (Math.PI/3);
       
       ball.dx = ball.speed * Math.sin(angel);
       ball.dy = - ball.speed * Math.cos(angel);
@@ -187,8 +200,8 @@ const block = {
   offSetLeft : 20,
   offSetTop : 20,
   marginTop : 40,
-  fillColor : "#2e3548",
-  strokeColor : "#fff"
+  fillColor : "#f4acb7",
+  strokeColor : "#f28482"
 }
 
 // CREATE BLOCKS
@@ -306,35 +319,35 @@ function levelUp(){
     for (let c = 0; c < block.column; c++) {
       let b = blocks[r][c]
       isLvlDone = isLvlDone && ! b.status;
-    }
-    if(isLvlDone){
-      WIN.play();
-      if(LEVEL < 6){
-        block.row++;      
-        createBlocks();
-        resetBall();
-        ball.speed += 0.8;
-        LEVEL++;
-      } else if(LEVEL == 6){
-        block.row = block.row - block.row + 1;      
-        createBlocks();
-        resetBall();
-        ball.speed += 0.5;
-        paddle.dx = paddle.dx + 2
-        LEVEL++;
-      }else if(LEVEL > 6){
-        block.row++;      
-        createBlocks();
-        resetBall();
-        ball.speed += 0.5;
-        LEVEL++;
       }
-      if(LEVEL >= MAX_LEVEL){
-        showYouWon();
-        GAME_OVER = true;
-        return;
-      }      
     }
+  if(isLvlDone){
+    WIN.play();
+    if(LEVEL < 6){
+      block.row++;      
+      createBlocks();
+      resetBall();
+      ball.speed += 0.8;
+      LEVEL++;
+    } else if(LEVEL == 6){
+      block.row = block.row - block.row + 1;      
+      createBlocks();
+      resetBall();
+      ball.speed += 0.5;
+      paddle.dx = paddle.dx + 2
+      LEVEL++;
+    }else if(LEVEL > 6){
+      block.row++;      
+      createBlocks();
+      resetBall();
+      ball.speed += 0.5;
+      LEVEL++;
+    }
+    if(LEVEL >= MAX_LEVEL){
+      showYouWon();
+      GAME_OVER = true;
+      return;
+    }      
   }
 }
 
@@ -358,7 +371,6 @@ function loop(){
 
   draw();
   update();
-
   if(! GAME_OVER){
     requestAnimationFrame(loop);
   }
